@@ -24,7 +24,6 @@ const navItems = [
   { icon: Database, label: "Data Management", href: "/dashboard/data" },
   { icon: Weight, label: "AHP Weighting", href: "/dashboard/weights" },
   { icon: TrendingUp, label: "Ranking Analysis", href: "/dashboard/analysis" },
-  { icon: ArrowLeftRight, label: "Allocation Opt", href: "/dashboard/optimization" },
   { icon: Download, label: "Export Results", href: "/dashboard/export" },
 ];
 

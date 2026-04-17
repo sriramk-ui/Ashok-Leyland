@@ -209,10 +209,10 @@ export default function RankingAnalysis() {
           </div>
           <p className="text-xs font-black uppercase tracking-[0.3em] mb-3 opacity-60">{data[0].name}</p>
           <h2 className="text-7xl font-black italic leading-none mb-4 tracking-tighter">{data[0].hybrid.toFixed(3)}</h2>
-          <p className="text-[10px] font-black uppercase tracking-widest bg-black/10 px-4 py-2 rounded-full inline-block">Best Compromise Index</p>
+          <p className="text-[10px] font-black uppercase tracking-widest bg-black/10 px-4 py-2 rounded-full inline-block">Best Compromise (VIKOR)</p>
           <div className="mt-8 flex items-center justify-center gap-2">
              <CheckCircle className="w-4 h-4" />
-             <span className="text-[10px] font-black uppercase tracking-[0.2em]">Validated by ORAGADAM Hub</span>
+             <span className="text-[10px] font-black uppercase tracking-[0.2em]">Balanced solution recommended by VIKOR</span>
           </div>
         </motion.div>
 
@@ -226,7 +226,7 @@ export default function RankingAnalysis() {
           <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 bg-amber-700 rounded-2xl flex items-center justify-center font-black text-white">3</div>
           <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-2">{data[2].name}</p>
           <h3 className="text-4xl font-black italic text-foreground mb-6 tracking-tighter">{data[2].hybrid.toFixed(3)}</h3>
-          <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-2xl text-[8px] font-black uppercase tracking-widest text-blue-500">Expansion Potential</div>
+          <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-2xl text-[8px] font-black uppercase tracking-widest text-blue-500">Top ranked site based on TOPSIS</div>
         </motion.div>
       </div>
 
@@ -303,13 +303,19 @@ export default function RankingAnalysis() {
             ))}
           </div>
           
-          <button 
-            onClick={() => router.push("/dashboard/optimization")}
-            className="mt-8 w-full p-5 rounded-2xl bg-white text-black text-xs font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:scale-105 transition-all"
-          >
-            Proceed to Optimization
-            <ArrowRight className="w-4 h-4 stroke-[3]" />
-          </button>
+          <div className="mt-8 p-6 rounded-[2rem] bg-secondary/20 border border-border flex flex-col md:flex-row items-center justify-between gap-6 shadow-inner">
+            <div>
+              <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-1">Advanced Options</p>
+              <h4 className="text-sm font-black italic text-foreground uppercase tracking-tight">Capacity Allocation Optimization</h4>
+            </div>
+            <button 
+              onClick={() => router.push("/dashboard/optimization")}
+              className="w-full md:w-auto px-8 py-4 rounded-2xl bg-white text-black text-xs font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:scale-105 transition-all shadow-lg"
+            >
+              Run Optimization
+              <ArrowRight className="w-4 h-4 stroke-[3]" />
+            </button>
+          </div>
         </div>
       </div>
     </div>

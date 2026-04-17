@@ -41,7 +41,7 @@ export default function ExportPage() {
             { data: liveData },
             { responseType: 'blob' }
          );
-         const url = window.URL.createObjectURL(new Blob([response.data]));
+         const url = window.URL.createObjectURL(new Blob([response.data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }));
          const link = document.createElement('a');
          link.href = url;
          link.setAttribute('download', 'Ashok_Leyland_Executive_Report.xlsx');
