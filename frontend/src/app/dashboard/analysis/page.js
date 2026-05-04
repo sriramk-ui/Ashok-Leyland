@@ -7,132 +7,293 @@ import { useTheme } from "@/components/ThemeProvider";
 
 const GeospatialMap = dynamic(() => import("@/components/GeospatialMap"), {
   ssr: false,
-  loading: () => <div className="min-h-[550px] w-full animate-pulse bg-white/5 rounded-[40px] border border-white/10 flex items-center justify-center p-8"><h1 className="text-xl text-blue-500 font-black italic animate-bounce">Loading CARTO Dark Matter...</h1></div>
+  loading: () => (
+    <div className="min-h-[500px] w-full animate-pulse bg-primary/5 rounded-[2rem] border border-border flex items-center justify-center p-8">
+      <h1 className="text-xl text-primary font-black italic animate-bounce">Loading Geospatial Map…</h1>
+    </div>
+  ),
 });
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer, 
-  Cell,
-  Legend
+
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
 } from "recharts";
 import axios from "axios";
-import { 
-  Trophy, 
-  Target, 
-  TrendingUp, 
-  Scale, 
-  ArrowUpRight,
-  Info,
-  ChevronRight,
-  ArrowRight,
-  CheckCircle,
-  Download
+import {
+  Trophy, Target, TrendingUp, Scale, ArrowRight, Info, CheckCircle,
+  Download, Sparkles, MapPin, Zap, Lightbulb, Medal,
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import PlantSupplyChainModal from "@/components/PlantSupplyChainModal";
+import LogoLoader from "@/components/LogoLoader";
 
+// ─── Smart Insight Generator ─────────────────────────────────────
+function generateInsight(site, allSites, features) {
+  if (!site || !features || features.length === 0) return null;
+  const benefitFeatures = features.filter(f => {
+    const l = f.toLowerCase();
+    return !l.includes("cost") && !l.includes("capex") && !l.includes("risk");
+  });
+  const costFeatures = features.filter(f => {
+    const l = f.toLowerCase();
+    return l.includes("cost") || l.includes("capex");
+  });
+  const insights = [];
+  benefitFeatures.forEach(f => {
+    const siteVal = parseFloat(site[f]) || 0;
+    const isTop = allSites.every(s => (parseFloat(s[f]) || 0) <= siteVal || s === site);
+    if (isTop) insights.push(`leading ${f}`);
+  });
+  costFeatures.forEach(f => {
+    const siteVal = parseFloat(site[f]) || 0;
+    const isLowest = allSites.every(s => (parseFloat(s[f]) || 0) >= siteVal || s === site);
+    if (isLowest) insights.push(`lowest ${f}`);
+  });
+  if (insights.length === 0) return "Strong balanced performance across all criteria.";
+  if (insights.length === 1) return `Stands out for ${insights[0]}.`;
+  return `Best in class: ${insights.slice(0, 2).join(" and ")}.`;
+}
+
+const loadingMessages = [
+  "Analyzing dataset…",
+  "Normalizing decision matrix…",
+  "Computing TOPSIS scores…",
+  "Running VIKOR algorithm…",
+  "Building hybrid rankings…",
+];
+
+// ─── Podium Card ──────────────────────────────────────────────────
+// Descending staircase layout: rank 1 (left, tallest) -> rank 4 (right, shortest)
+function PodiumCard({ rank, site, activeMetric, insight, onClick }) {
+  // Determine top padding to create the descending steps
+  let ptClass = "pt-0";
+  if (rank === 2) ptClass = "pt-12 md:pt-16";
+  if (rank === 3) ptClass = "pt-12 md:pt-32";
+  if (rank === 4) ptClass = "pt-12 md:pt-48";
+
+  if (rank === 1) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: -12, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ delay: 0.05, type: "spring", stiffness: 180, damping: 22 }}
+        onClick={onClick}
+        className={`flex-1 ${ptClass} relative cursor-pointer group min-w-0`}
+      >
+        <div className="neon-border rounded-[2.5rem] h-full">
+          <div
+            className="rounded-[2.5rem] bg-gradient-to-b from-primary/10 to-transparent p-4 xl:p-6 pt-14 text-center relative overflow-visible h-full flex flex-col"
+            style={{ boxShadow: "0 0 60px rgba(0,102,179,0.15), inset 0 1px 0 rgba(0,102,179,0.1)" }}
+          >
+            {/* Trophy badge */}
+            <div className="absolute -top-7 left-1/2 -translate-x-1/2 w-14 h-14 bg-card border-2 border-primary/30 rounded-2xl flex items-center justify-center shadow-xl group-hover:border-primary transition-all z-10">
+              <Trophy className="w-7 h-7 text-primary group-hover:scale-110 transition-transform" style={{ filter: "drop-shadow(0 0 6px rgba(0,102,179,0.6))" }} />
+            </div>
+            <p className="text-[8px] font-black text-primary/60 uppercase tracking-[0.4em] mb-1">#1 Ranked</p>
+            <p className="text-[10px] xl:text-xs font-black text-foreground uppercase tracking-[0.1em] mb-2 leading-tight px-1">{site.name}</p>
+            <p
+              className="text-4xl xl:text-5xl font-black italic tracking-tighter text-primary leading-none mb-3"
+              style={{ textShadow: "0 0 32px rgba(0,102,179,0.4)" }}
+            >
+              {site[activeMetric]?.toFixed(3)}
+            </p>
+            <div className="insight-chip insight-chip-cyan mx-auto w-fit mb-3 text-[8px] xl:text-[9px] px-2 py-1">🥇 Top Recommendation</div>
+            <div className="mt-auto">
+              {insight && (
+                <p className="text-[9px] text-foreground/65 font-bold italic leading-relaxed group-hover:text-foreground/90 transition-colors px-1">
+                  <Lightbulb className="w-3 h-3 inline mr-1 text-primary" />
+                  {insight}
+                </p>
+              )}
+              <p className="text-[7px] xl:text-[8px] text-muted-foreground/40 uppercase tracking-widest mt-4 group-hover:text-primary/50 transition-colors">
+                ↗ Click for Details
+              </p>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  if (rank === 2) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.15 }}
+        onClick={onClick}
+        className={`flex-1 ${ptClass} relative cursor-pointer group min-w-0`}
+      >
+        <div
+          className="rounded-[2rem] bg-card border p-3 xl:p-5 pt-12 text-center relative overflow-visible transition-all duration-300 h-full flex flex-col"
+          style={{ borderColor: "rgba(99,102,241,0.25)", boxShadow: "0 0 30px rgba(99,102,241,0.06)" }}
+        >
+          <div className="absolute inset-0 rounded-[2rem] opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" style={{ boxShadow: "inset 0 0 40px rgba(99,102,241,0.07)" }} />
+          {/* Rank badge */}
+          <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 rounded-2xl bg-violet-500/10 border border-violet-400/30 flex items-center justify-center shadow-lg group-hover:bg-violet-500 group-hover:border-violet-500 transition-all z-10">
+            <span className="text-xl font-black text-violet-500 group-hover:text-white transition-colors">2</span>
+          </div>
+          <p className="text-[8px] font-black text-violet-400/70 uppercase tracking-[0.35em] mb-1">#2 Ranked</p>
+          <p className="text-[9px] xl:text-[10px] font-black text-foreground uppercase tracking-[0.1em] mb-2 leading-tight px-1">{site.name}</p>
+          <p className="text-2xl xl:text-3xl font-black italic tracking-tighter text-foreground leading-none mb-3">
+            {site[activeMetric]?.toFixed(3)}
+          </p>
+          <div className="insight-chip insight-chip-purple mx-auto w-fit mb-3 text-[8px] px-2 py-1">⚖️ VIKOR Compromise</div>
+          <div className="mt-auto">
+            {insight && (
+              <p className="text-[8px] text-muted-foreground font-bold italic leading-relaxed opacity-70 group-hover:opacity-100 transition-opacity px-1">
+                {insight}
+              </p>
+            )}
+            <p className="text-[7px] xl:text-[8px] text-muted-foreground/35 uppercase tracking-widest mt-4 group-hover:text-violet-400/60 transition-colors">
+              ↗ Click for Details
+            </p>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  if (rank === 3) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.25 }}
+        onClick={onClick}
+        className={`flex-1 ${ptClass} relative cursor-pointer group min-w-0`}
+      >
+        <div
+          className="rounded-[2rem] bg-card border p-3 xl:p-5 pt-12 text-center relative overflow-visible transition-all duration-300 h-full flex flex-col"
+          style={{ borderColor: "rgba(245,158,11,0.2)" }}
+        >
+          <div className="absolute inset-0 rounded-[2rem] opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" style={{ boxShadow: "inset 0 0 40px rgba(245,158,11,0.06)" }} />
+          {/* Rank badge */}
+          <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-400/30 flex items-center justify-center shadow-lg group-hover:bg-amber-500 group-hover:border-amber-500 transition-all z-10">
+            <span className="text-xl font-black text-amber-500 group-hover:text-white transition-colors">3</span>
+          </div>
+          <p className="text-[8px] font-black text-amber-400/70 uppercase tracking-[0.35em] mb-1">#3 Ranked</p>
+          <p className="text-[9px] xl:text-[10px] font-black text-foreground uppercase tracking-[0.1em] mb-2 leading-tight px-1">{site.name}</p>
+          <p className="text-2xl xl:text-3xl font-black italic tracking-tighter text-foreground leading-none mb-3">
+            {site[activeMetric]?.toFixed(3)}
+          </p>
+          <div className="insight-chip insight-chip-emerald mx-auto w-fit mb-3 text-[8px] px-2 py-1">📊 Strong Contender</div>
+          <div className="mt-auto">
+            <p className="text-[7px] xl:text-[8px] text-muted-foreground/35 uppercase tracking-widest mt-4 group-hover:text-amber-400/60 transition-colors">
+              ↗ Click for Details
+            </p>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // ── 4th place
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.35 }}
+      onClick={onClick}
+      className={`flex-1 ${ptClass} relative cursor-pointer group min-w-0 hidden md:block`}
+    >
+      <div
+        className="rounded-[2rem] bg-card border p-3 xl:p-5 pt-12 text-center relative overflow-visible transition-all duration-300 h-full flex flex-col"
+        style={{ borderColor: "rgba(148,163,184,0.2)" }}
+      >
+        <div className="absolute inset-0 rounded-[2rem] opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" style={{ boxShadow: "inset 0 0 40px rgba(148,163,184,0.06)" }} />
+        {/* Rank badge */}
+        <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 rounded-2xl bg-slate-500/10 border border-slate-400/30 flex items-center justify-center shadow-lg group-hover:bg-slate-500 group-hover:border-slate-500 transition-all z-10">
+          <span className="text-xl font-black text-slate-500 group-hover:text-white transition-colors">4</span>
+        </div>
+        <p className="text-[8px] font-black text-slate-400/70 uppercase tracking-[0.35em] mb-1">#4 Ranked</p>
+        <p className="text-[9px] xl:text-[10px] font-black text-foreground uppercase tracking-[0.1em] mb-2 leading-tight px-1">{site.name}</p>
+        <p className="text-2xl xl:text-3xl font-black italic tracking-tighter text-foreground leading-none mb-3">
+          {site[activeMetric]?.toFixed(3)}
+        </p>
+        <div className="insight-chip insight-chip-slate mx-auto w-fit mb-3 text-[8px] px-2 py-1 bg-slate-500/10 text-slate-500">✅ Solid Choice</div>
+        <div className="mt-auto">
+          <p className="text-[7px] xl:text-[8px] text-muted-foreground/35 uppercase tracking-widest mt-4 group-hover:text-slate-400/60 transition-colors">
+            ↗ Click for Details
+          </p>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+// ─── Main Page ────────────────────────────────────────────────────
 export default function RankingAnalysis() {
   const router = useRouter();
   const { theme } = useTheme();
   const [data, setData] = useState([]);
+  const [rawFeatures, setRawFeatures] = useState([]);
   const [activeMetric, setActiveMetric] = useState("hybrid");
   const [isLoading, setIsLoading] = useState(true);
+  const [loadingMsg, setLoadingMsg] = useState(loadingMessages[0]);
   const [isExporting, setIsExporting] = useState(false);
+  const [selectedPlant, setSelectedPlant] = useState(null);
+  const [usingCustomWeights, setUsingCustomWeights] = useState(false);
 
   const isDark = theme === "dark";
 
-  const handleExport = async () => {
-     try {
-        setIsExporting(true);
-        const response = await axios.post(
-           "http://127.0.0.1:8000/export/analytics", 
-           { data: data },
-           { responseType: 'blob' }
-        );
-        
-        // Create an invisible link to trigger the download prompt
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', 'Ashok_Leyland_Executive_Report.xlsx');
-        document.body.appendChild(link);
-        link.click();
-        link.parentNode.removeChild(link);
-     } catch (e) {
-        console.error("Export Analytics Failed:", e);
-        alert("Failed to generate Excel securely.");
-     } finally {
-        setIsExporting(false);
-     }
-  };
+  useEffect(() => {
+    if (!isLoading) return;
+    let i = 0;
+    const iv = setInterval(() => {
+      i = (i + 1) % loadingMessages.length;
+      setLoadingMsg(loadingMessages[i]);
+    }, 900);
+    return () => clearInterval(iv);
+  }, [isLoading]);
 
   useEffect(() => {
     const runAnalysis = async () => {
       try {
         const stData = localStorage.getItem("dss_live_data");
         const stFeat = localStorage.getItem("dss_live_features");
-        
-        if (!stData || !stFeat) {
-          setIsLoading(false);
-          return;
-        }
+        if (!stData || !stFeat) { setIsLoading(false); return; }
 
         const sites = JSON.parse(stData);
         const features = JSON.parse(stFeat);
-        
-        // Prepare 2D array matrix for algorithms
+        setRawFeatures(features);
+
         const matrixData = sites.map(site => features.map(f => Number(site[f] || 0)));
-        
-        // Define is_benefit arrays natively: Cost/Capex concepts are false, everything else true
         const isBenefit = features.map(f => {
-           const lower = f.toLowerCase();
-           if (lower.includes("cost") || lower.includes("capex") || lower.includes("risk")) return false;
-           return true; 
+          const lower = f.toLowerCase();
+          return !(lower.includes("cost") || lower.includes("capex") || lower.includes("risk"));
         });
 
-        // Set default equal weights for all dynamic features
-        const equalWeight = 1 / features.length;
-        const weights = features.map(() => equalWeight);
+        const savedWeightsRaw = localStorage.getItem("dss_ahp_weights");
+        let weights;
+        if (savedWeightsRaw) {
+          const parsed = JSON.parse(savedWeightsRaw);
+          if (parsed && parsed.length === features.length) {
+            weights = parsed;
+            setUsingCustomWeights(true);
+          }
+        }
+        if (!weights) weights = features.map(() => 1 / features.length);
 
-        const payload = {
-           data: matrixData,
-           weights: weights,
-           is_benefit: isBenefit
-        };
-
+        const payload = { data: matrixData, weights, is_benefit: isBenefit };
         const [topsisRes, vikorRes] = await Promise.all([
-           axios.post("http://127.0.0.1:8000/analyze/topsis", payload),
-           axios.post("http://127.0.0.1:8000/analyze/vikor", payload)
+          axios.post("http://127.0.0.1:8000/analyze/topsis", payload),
+          axios.post("http://127.0.0.1:8000/analyze/vikor", payload),
         ]);
 
         const topsisScores = topsisRes.data.scores;
-        // VIKOR yields S, R, Q where Q is the overall ranking measure (lower is better, 0 is best).
-        // Let's invert Q so higher is better for a hybrid index (1 - Q)
         const vikorQ = vikorRes.data.Q;
         const vikorScores = vikorQ.map(q => 1 - q);
 
-        const combinedRanking = sites.map((site, idx) => {
-           const t = topsisScores[idx];
-           const v = vikorScores[idx];
-           return {
-              ...site,
-              name: site.Site || site.name || `Site ${idx+1}`,
-              topsis: t,
-              vikor: v,
-              hybrid: (t * 0.5) + (v * 0.5)
-           };
-        });
-
+        const combinedRanking = sites.map((site, idx) => ({
+          ...site,
+          name: site.Site || site.name || `Site ${idx + 1}`,
+          topsis: topsisScores[idx],
+          vikor: vikorScores[idx],
+          hybrid: topsisScores[idx] * 0.5 + vikorScores[idx] * 0.5,
+        }));
         combinedRanking.sort((a, b) => b.hybrid - a.hybrid);
-        
-        // Assign ranks
-        combinedRanking.forEach((item, index) => item.rank = index + 1);
-        
+        combinedRanking.forEach((item, index) => (item.rank = index + 1));
         localStorage.setItem("dss_computed_ranking", JSON.stringify(combinedRanking));
         setData(combinedRanking);
       } catch (e) {
@@ -144,127 +305,165 @@ export default function RankingAnalysis() {
     runAnalysis();
   }, []);
 
-  if (isLoading) return <div className="p-20 text-center"><h1 className="text-2xl text-blue-500 animate-pulse font-black italic">Running Dynamic Models...</h1></div>;
-  if (data.length === 0) return <div className="p-20 text-center text-gray-400">No Dataset Available. Please Upload on the Data page.</div>;
+  const topInsight   = useMemo(() => data.length > 0 ? generateInsight(data[0], data, rawFeatures) : null, [data, rawFeatures]);
+  const vikorInsight = useMemo(() => data.length > 1 ? generateInsight(data[1], data, rawFeatures) : null, [data, rawFeatures]);
+
+  const barColors = (index) => {
+    if (index === 0) return "var(--primary)";
+    if (index === 1) return "#818cf8";
+    if (index === 2) return "#f59e0b";
+    return isDark ? "#1e293b" : "#e2e8f0";
+  };
+
+  const metricHelpers = {
+    hybrid: "Balanced recommendation combining TOPSIS + VIKOR",
+    topsis: "Higher score = better location (distance from ideal solution)",
+    vikor: "Inverted Q — closer to 1 = best compromise across all criteria",
+  };
+
+  // ─── Loading ──────────────────────────────────────────────────
+  if (isLoading) return (
+    <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6">
+      <LogoLoader size="lg" text={loadingMsg} />
+      <p className="text-[10px] text-muted-foreground uppercase tracking-[0.3em] font-bold">
+        Running TOPSIS &amp; VIKOR algorithms
+      </p>
+    </div>
+  );
+
+  if (data.length === 0) return (
+    <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 text-center">
+      <Scale className="w-16 h-16 text-primary/30" />
+      <h2 className="text-2xl font-black italic uppercase">No Dataset Available</h2>
+      <p className="text-muted-foreground max-w-sm">Please upload your dataset on the Data Management page first.</p>
+      <button onClick={() => router.push("/dashboard/data")} className="btn-next-step">
+        Go to Data Management <ArrowRight className="w-5 h-5" />
+      </button>
+    </div>
+  );
 
   return (
-    <div className="space-y-10 selection:bg-blue-500 selection:text-black pb-20">
-      {/* Header */}
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div>
-          <h1 className="text-4xl font-black tracking-tighter uppercase italic">
-            Ranking <span className="text-blue-500">Analysis</span>
-          </h1>
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mt-1">
-            Hybrid Multi-Criteria Decision Outcome
+    <div className="space-y-10 selection:bg-primary/20 selection:text-primary pb-20">
+
+      {/* ── Info Banner ─────────────────────────────────────────── */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-3 px-5 py-3.5 rounded-2xl bg-primary/5 border border-primary/15">
+          <Info className="w-4 h-4 text-primary shrink-0" />
+          <p className="text-[11px] font-bold text-primary/80 uppercase tracking-widest">
+            Step 3 — TOPSIS: higher score = better location · VIKOR: best compromise solution
           </p>
         </div>
-        <div className="flex bg-white/5 p-1 rounded-2xl border border-white/10">
-           {["hybrid", "topsis", "vikor"].map(m => (
-             <button 
+        <AnimatePresence>
+          {usingCustomWeights && (
+            <motion.div
+              initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}
+              className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-accent/5 border border-accent/20"
+            >
+              <Sparkles className="w-4 h-4 text-accent shrink-0" />
+              <p className="text-[11px] font-bold text-accent uppercase tracking-widest">
+                Using your AHP priority weights — rankings reflect your decisions
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* ── Metric Selector ────────────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <p className="text-[11px] text-muted-foreground font-bold uppercase tracking-widest">
+          {metricHelpers[activeMetric]}
+        </p>
+        <div className="flex bg-secondary/60 p-1 rounded-2xl border border-border w-fit gap-1 self-end sm:self-auto">
+          {["hybrid", "topsis", "vikor"].map(m => (
+            <button
               key={m}
               onClick={() => setActiveMetric(m)}
               className={cn(
                 "px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
-                activeMetric === m ? "bg-blue-500 text-white shadow-lg" : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                activeMetric === m
+                  ? "bg-primary text-white shadow-lg"
+                  : "text-muted-foreground hover:text-foreground hover:bg-white/5",
               )}
-             >
-               {m}
-             </button>
-           ))}
+            >
+              {m}
+            </button>
+          ))}
         </div>
-        <button 
-           onClick={handleExport}
-           disabled={isExporting}
-           className="btn-soft-primary px-6 py-3 rounded-2xl bg-blue-500/10 text-blue-500 border border-blue-500/30 hover:bg-blue-500/20 text-xs font-black uppercase tracking-[0.1em] flex items-center justify-center gap-2 transition-all disabled:opacity-50 shadow-xl ml-auto md:ml-0"
-        >
-           <Download className="w-4 h-4" />
-           {isExporting ? "Compiling Server Engine..." : "Export Executive Analytics"}
-        </button>
-      </header>
-
-      {/* Top 3 Podium */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-end">
-        {/* Second Place */}
-        <motion.div 
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="p-8 rounded-[40px] bg-card/60 border border-border text-center relative pt-12 shadow-sm"
-        >
-          <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 bg-muted border border-border rounded-2xl flex items-center justify-center font-black text-foreground">2</div>
-          <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-2">{data[1].name}</p>
-          <h3 className="text-4xl font-black italic text-foreground mb-6 tracking-tighter">{data[1].hybrid.toFixed(3)}</h3>
-          <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-[8px] font-black uppercase tracking-widest text-emerald-500">Stable Alternative</div>
-        </motion.div>
-
-        {/* First Place */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="p-10 rounded-[50px] bg-blue-500 text-white text-center relative pt-16 shadow-[0_0_50px_rgba(59,130,246,0.2)] border-2 border-white/10"
-        >
-          <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-20 h-20 bg-black rounded-3xl flex items-center justify-center shadow-xl">
-             <Trophy className="w-10 h-10 text-blue-500" />
-          </div>
-          <p className="text-xs font-black uppercase tracking-[0.3em] mb-3 opacity-60">{data[0].name}</p>
-          <h2 className="text-7xl font-black italic leading-none mb-4 tracking-tighter">{data[0].hybrid.toFixed(3)}</h2>
-          <p className="text-[10px] font-black uppercase tracking-widest bg-black/10 px-4 py-2 rounded-full inline-block">Best Compromise (VIKOR)</p>
-          <div className="mt-8 flex items-center justify-center gap-2">
-             <CheckCircle className="w-4 h-4" />
-             <span className="text-[10px] font-black uppercase tracking-[0.2em]">Balanced solution recommended by VIKOR</span>
-          </div>
-        </motion.div>
-
-        {/* Third Place */}
-        <motion.div 
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="p-8 rounded-[40px] bg-card/60 border border-border text-center relative pt-12 shadow-sm"
-        >
-          <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 bg-amber-700 rounded-2xl flex items-center justify-center font-black text-white">3</div>
-          <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-2">{data[2].name}</p>
-          <h3 className="text-4xl font-black italic text-foreground mb-6 tracking-tighter">{data[2].hybrid.toFixed(3)}</h3>
-          <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-2xl text-[8px] font-black uppercase tracking-widest text-blue-500">Top ranked site based on TOPSIS</div>
-        </motion.div>
       </div>
 
-      {/* Geospatial Map Section */}
+      {/* ── Podium ─────────────────────────────────────────────── */}
+      {/* Descending staircase layout: 1 -> 4 left to right */}
+      <div className="flex flex-col md:flex-row items-stretch justify-center gap-3 xl:gap-5 pt-10 pb-8">
+        {data.slice(0, 4).map((site, index) => {
+          const rank = index + 1;
+          const insight = rank === 1 ? topInsight : (rank === 2 ? vikorInsight : null);
+          return (
+            <PodiumCard
+              key={site.name || index}
+              rank={rank}
+              site={site}
+              activeMetric={activeMetric}
+              insight={insight}
+              onClick={() => setSelectedPlant(site)}
+            />
+          );
+        })}
+      </div>
+
+      {/* ── Geospatial Map ──────────────────────────────────────── */}
       <div className="w-full">
-         <GeospatialMap data={data} />
+        <GeospatialMap data={data} />
       </div>
 
-      {/* Charts & table */}
+      {/* ── Charts & Full Ranking ───────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="p-8 pb-4 rounded-[40px] bg-card border border-border shadow-md">
-          <h3 className="text-xl font-black uppercase italic tracking-tight mb-8">Score Comparison</h3>
-          <div className="h-[400px] w-full">
+
+        {/* Bar Chart */}
+        <div className="p-8 pb-4 rounded-[2.5rem] bg-card border border-border shadow-sm">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-black uppercase italic tracking-tight">Score Comparison</h3>
+            <span className={cn("insight-chip text-[9px]",
+              activeMetric === "hybrid" ? "insight-chip-cyan"
+              : activeMetric === "topsis" ? "insight-chip-blue"
+              : "insight-chip-purple"
+            )}>{activeMetric.toUpperCase()}</span>
+          </div>
+          <div className="h-[380px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data} layout="vertical" margin={{ left: 40 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#222" : "#eee"} horizontal={false} />
+              <BarChart data={data} layout="vertical" margin={{ left: 40, right: 16 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#0f1f35" : "#f1f5f9"} horizontal={false} />
                 <XAxis type="number" hide />
-                <YAxis 
-                  dataKey="name" 
-                  type="category" 
-                  axisLine={false} 
+                <YAxis
+                  dataKey="name"
+                  type="category"
+                  axisLine={false}
                   tickLine={false}
-                  tick={{ fill: isDark ? '#666' : '#999', fontSize: 10, fontWeight: 900 }}
-                  width={100}
+                  tick={{ fill: isDark ? "#94a3b8" : "#64748b", fontSize: 10, fontWeight: 900 }}
+                  width={120}
                 />
-                <Tooltip 
-                  cursor={{ fill: isDark ? '#ffffff0a' : '#0000000a' }}
-                  contentStyle={{ 
-                    backgroundColor: isDark ? '#000' : '#fff', 
-                    border: `1px solid ${isDark ? '#333' : '#ddd'}`, 
-                    borderRadius: '12px',
-                    color: isDark ? '#fff' : '#000'
+                <Tooltip
+                  cursor={{ fill: isDark ? "rgba(0,102,179,0.04)" : "rgba(0,102,179,0.03)" }}
+                  content={({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                      const item = payload[0].payload;
+                      return (
+                        <div className="bg-card border border-border p-4 rounded-2xl shadow-xl space-y-1">
+                          <p className="text-xs font-black uppercase tracking-wider">{item.name}</p>
+                          <p className="text-primary font-black italic text-lg">{Number(payload[0].value).toFixed(3)}</p>
+                          <div className="pt-1 border-t border-border space-y-0.5">
+                            <p className="text-[9px] text-muted-foreground font-bold">TOPSIS: {item.topsis?.toFixed(3)}</p>
+                            <p className="text-[9px] text-muted-foreground font-bold">VIKOR: {item.vikor?.toFixed(3)}</p>
+                            <p className="text-[9px] text-muted-foreground font-bold">Hybrid: {item.hybrid?.toFixed(3)}</p>
+                          </div>
+                        </div>
+                      );
+                    }
+                    return null;
                   }}
-                  itemStyle={{ color: isDark ? '#fff' : '#000' }}
                 />
-                <Bar dataKey={activeMetric} radius={[0, 8, 8, 0]} barSize={32}>
-                  {data.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={index === 0 ? '#3b82f6' : (isDark ? '#1e293b' : '#e2e8f0')} />
+                <Bar dataKey={activeMetric} radius={[0, 8, 8, 0]} barSize={26} animationDuration={900}>
+                  {data.map((_, index) => (
+                    <Cell key={`cell-${index}`} fill={barColors(index)} />
                   ))}
                 </Bar>
               </BarChart>
@@ -272,53 +471,87 @@ export default function RankingAnalysis() {
           </div>
         </div>
 
-        <div className="p-8 rounded-[40px] bg-card border border-border shadow-md flex flex-col">
-          <h3 className="text-xl font-black uppercase italic tracking-tight mb-8">Full Audit Ranking</h3>
-          <div className="flex-1 space-y-4">
+        {/* Full Audit Ranking Table */}
+        <div className="p-8 rounded-[2.5rem] bg-card border border-border shadow-sm flex flex-col">
+          <h3 className="text-xl font-black uppercase italic tracking-tight mb-6">Full Audit Ranking</h3>
+          <div className="flex-1 space-y-3 overflow-y-auto custom-scrollbar pr-1">
             {data.map((item, i) => (
-              <div key={i} className="flex items-center justify-between p-6 rounded-2xl bg-secondary/30 border border-border hover:border-primary/20 hover:bg-secondary/50 transition-all group shadow-sm">
-                <div className="flex items-center gap-5">
-                   <div className={cn(
-                     "w-12 h-12 rounded-2xl flex items-center justify-center font-black text-lg italic shadow-subtle",
-                     i === 0 ? "bg-blue-500 text-white" : "bg-muted text-muted-foreground"
-                   )}>
-                     {i + 1}
-                   </div>
-                   <div>
-                     <p className="text-sm font-black uppercase tracking-tight text-foreground mb-1">{item.name}</p>
-                     <div className="flex gap-4">
-                       <p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">TOPSIS: {item.topsis.toFixed(3)}</p>
-                       <p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">VIKOR: {item.vikor.toFixed(3)}</p>
-                     </div>
-                   </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-2xl font-black italic text-blue-500 leading-none mb-1">{item.hybrid.toFixed(3)}</p>
-                  <div className="flex items-center gap-1 justify-end">
-                    <TrendingUp className="w-3 h-3 text-emerald-500" />
-                    <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest">TOP Choice</span>
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.05 }}
+                className="flex items-center justify-between p-4 rounded-2xl bg-secondary/30 border border-border hover:border-primary/25 hover:bg-secondary/50 transition-all group cursor-pointer"
+                onClick={() => setSelectedPlant(item)}
+              >
+                <div className="flex items-center gap-4">
+                  <div className={cn(
+                    "w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shadow-sm shrink-0",
+                    i === 0 ? "bg-primary text-white" : i === 1 ? "bg-violet-500/15 text-violet-500" : i === 2 ? "bg-amber-500/15 text-amber-500" : "bg-muted text-muted-foreground",
+                  )}
+                    style={i === 0 ? { boxShadow: "0 4px 15px var(--glow-blue)" } : {}}
+                  >
+                    {i + 1}
+                  </div>
+                  <div>
+                    <p className="text-sm font-black uppercase tracking-tight text-foreground">{item.name}</p>
+                    <div className="flex gap-3 mt-0.5">
+                      <p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">T: {item.topsis?.toFixed(3)}</p>
+                      <p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">V: {item.vikor?.toFixed(3)}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
+                <div className="text-right">
+                  <p className="text-lg font-black italic text-primary leading-none">{item.hybrid?.toFixed(3)}</p>
+                  {i === 0 && (
+                    <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-1 justify-end mt-1">
+                      <TrendingUp className="w-3 h-3" /> Top
+                    </span>
+                  )}
+                </div>
+              </motion.div>
             ))}
-          </div>
-          
-          <div className="mt-8 p-6 rounded-[2rem] bg-secondary/20 border border-border flex flex-col md:flex-row items-center justify-between gap-6 shadow-inner">
-            <div>
-              <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-1">Advanced Options</p>
-              <h4 className="text-sm font-black italic text-foreground uppercase tracking-tight">Capacity Allocation Optimization</h4>
-            </div>
-            <button 
-              onClick={() => router.push("/dashboard/optimization")}
-              className="w-full md:w-auto px-8 py-4 rounded-2xl bg-white text-black text-xs font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:scale-105 transition-all shadow-lg"
-            >
-              Run Optimization
-              <ArrowRight className="w-4 h-4 stroke-[3]" />
-            </button>
           </div>
         </div>
       </div>
+
+      {/* ── CTA ─────────────────────────────────────────────────── */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+        className="flex flex-col sm:flex-row items-center justify-between gap-6 p-8 rounded-[2rem] border"
+        style={{
+          background: "linear-gradient(135deg, rgba(0,102,179,0.06) 0%, rgba(99,102,241,0.05) 100%)",
+          borderColor: "rgba(0,102,179,0.2)",
+        }}
+      >
+        <div>
+          <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-1">
+            🏆 Top Site: {data[0]?.name}
+          </p>
+          <h3 className="text-lg font-black italic uppercase tracking-tight text-foreground">
+            Analysis complete — download your executive report
+          </h3>
+          <p className="text-xs text-muted-foreground font-bold mt-1">
+            Export structured Excel &amp; PDF with rankings, weights, and insights.
+          </p>
+        </div>
+        <button onClick={() => router.push("/dashboard/export")} className="btn-next-step shrink-0">
+          View &amp; Export Results
+          <ArrowRight className="w-5 h-5 stroke-[2.5]" />
+        </button>
+      </motion.div>
+
+      {/* ── Modal ───────────────────────────────────────────────── */}
+      <AnimatePresence>
+        {selectedPlant && (
+          <PlantSupplyChainModal
+            plant={selectedPlant}
+            onClose={() => setSelectedPlant(null)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
-

@@ -5,12 +5,12 @@ Write-Host "--- Starting Ashok Leyland Smart Plant Location DSS ---" -Foreground
 
 # 1. Start Backend in the background
 Write-Host "Starting Backend (Mathematical Engine)..." -ForegroundColor Cyan
-$BackendDir = "c:\Users\Saravanan.P\OneDrive\Documents\ANTI_GRAVITY\ASHOK_LEYLAND\backend"
+$BackendDir = "C:\AH\Ashok_Leyland\backend"
 $env:PYTHONPATH = $BackendDir
-Start-Process -FilePath "c:\Users\Saravanan.P\OneDrive\Documents\ANTI_GRAVITY\ASHOK_LEYLAND\backend\venv\Scripts\python.exe" -ArgumentList "-m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload" -WorkingDirectory $BackendDir -WindowStyle Hidden
+Start-Process -FilePath "python" -ArgumentList "-m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload" -WorkingDirectory $BackendDir -WindowStyle Hidden
 
 # 2. Start Frontend
 Write-Host "Starting Frontend (User Interface)..." -ForegroundColor Cyan
-$FrontendDir = "c:\Users\Saravanan.P\OneDrive\Documents\ANTI_GRAVITY\ASHOK_LEYLAND\frontend"
+$FrontendDir = "C:\AH\Ashok_Leyland\frontend"
 cd $FrontendDir
 npm run dev

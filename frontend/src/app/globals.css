@@ -1,125 +1,362 @@
 @import "tailwindcss";
 
+/* ─── Light Theme ─────────────────────────────────────────────────── */
 :root {
-  /* Base Colors - Light Theme */
-  --background: #fdfdfd;
-  --foreground: #020617;
-  --card: #ffffff;
-  --card-foreground: #020617;
-  --popover: #ffffff;
-  --popover-foreground: #020617;
-  --primary: #3b82f6;
-  --primary-foreground: #ffffff;
-  --secondary: #f1f5f9;
-  --secondary-foreground: #0f172a;
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
-  --accent: #f1f5f9;
-  --accent-foreground: #0f172a;
-  --destructive: #ef4444;
-  --destructive-foreground: #f8fafc;
-  --border: #e2e8f0;
-  --input: #e2e8f0;
-  --ring: #3b82f6;
-  --radius: 1rem;
-  
-  /* Sidebar Specific */
-  --sidebar-bg: #ffffff;
-  --sidebar-foreground: #475569;
-  --sidebar-primary: #3b82f6;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f8fafc;
-  --sidebar-accent-foreground: #0f172a;
-  --sidebar-border: #f1f5f9;
+  --background:           #F5F7FA;
+  --foreground:           #071A2D;
+  --card:                 #FFFFFF;
+  --card-foreground:      #071A2D;
+  --popover:              #FFFFFF;
+  --popover-foreground:   #071A2D;
+
+  /* Ashok Leyland Brand Blues */
+  --primary:              #0066B3;
+  --primary-deep:         #004BBD;
+  --primary-foreground:   #FFFFFF;
+  --accent:               #00D4FF;
+  --accent-foreground:    #071A2D;
+
+  --secondary:            #EBF3FB;
+  --secondary-foreground: #071A2D;
+  --muted:                #EBF3FB;
+  --muted-foreground:     #64748B;
+
+  --success:              #22C55E;
+  --warning:              #F59E0B;
+  --destructive:          #EF4444;
+  --destructive-foreground: #FFFFFF;
+  --neutral:              #64748B;
+
+  --border:               #D1E3F3;
+  --input:                #D1E3F3;
+  --ring:                 #0066B3;
+  --radius:               1rem;
+
+  /* Sidebar */
+  --sidebar-bg:           #FFFFFF;
+  --sidebar-foreground:   #0A3D6E;
+  --sidebar-primary:      #0066B3;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent:       #EBF3FB;
+  --sidebar-accent-foreground:  #071A2D;
+  --sidebar-border:       #D1E3F3;
+
+  /* Brand gradient */
+  --gradient-brand:       linear-gradient(135deg, #0066B3 0%, #00D4FF 100%);
+  --gradient-brand-hover: linear-gradient(135deg, #004BBD 0%, #00BADF 100%);
+
+  /* Glow tokens */
+  --glow-cyan:            rgba(0, 212, 255, 0.35);
+  --glow-blue:            rgba(0, 102, 179, 0.35);
+  --glow-purple:          rgba(99, 102, 241, 0.3);
+  --glow-emerald:         rgba(34, 197, 94, 0.3);
 }
 
+/* ─── Dark Theme ──────────────────────────────────────────────────── */
 .dark {
-  --background: #020617;
-  --foreground: #f8fafc;
-  --card: #0f172a;
-  --card-foreground: #f8fafc;
-  --popover: #020617;
-  --popover-foreground: #f8fafc;
-  --primary: #3b82f6;
-  --primary-foreground: #ffffff;
-  --secondary: #1e293b;
-  --secondary-foreground: #f8fafc;
-  --muted: #1e293b;
-  --muted-foreground: #94a3b8;
-  --accent: #1e293b;
-  --accent-foreground: #f8fafc;
-  --destructive: #7f1d1d;
-  --destructive-foreground: #f8fafc;
-  --border: #1e293b;
-  --input: #1e293b;
-  --ring: #3b82f6;
+  --background:           #081220;
+  --foreground:           #E2EDF7;
+  --card:                 #0A1929;
+  --card-foreground:      #E2EDF7;
+  --popover:              #0A1929;
+  --popover-foreground:   #E2EDF7;
 
-  /* Sidebar Specific */
-  --sidebar-bg: #020617;
-  --sidebar-foreground: #94a3b8;
-  --sidebar-primary: #3b82f6;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #0f172a;
-  --sidebar-accent-foreground: #f8fafc;
-  --sidebar-border: #0f172a;
+  /* Ashok Leyland Brand Blues — Dark */
+  --primary:              #33A6FF;
+  --primary-deep:         #0066B3;
+  --primary-foreground:   #FFFFFF;
+  --accent:               #00E5FF;
+  --accent-foreground:    #081220;
+
+  --secondary:            #0A3D6E;
+  --secondary-foreground: #E2EDF7;
+  --muted:                #071A2D;
+  --muted-foreground:     #94A3B8;
+
+  --success:              #22C55E;
+  --warning:              #F59E0B;
+  --destructive:          #EF4444;
+  --destructive-foreground: #FFFFFF;
+  --neutral:              #94A3B8;
+
+  --border:               #0F2D4A;
+  --input:                #0F2D4A;
+  --ring:                 #33A6FF;
+
+  /* Sidebar */
+  --sidebar-bg:           #071A2D;
+  --sidebar-foreground:   #94A3B8;
+  --sidebar-primary:      #33A6FF;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent:       #0A1929;
+  --sidebar-accent-foreground:  #E2EDF7;
+  --sidebar-border:       #0A1929;
+
+  /* Brand gradient */
+  --gradient-brand:       linear-gradient(135deg, #33A6FF 0%, #00E5FF 100%);
+  --gradient-brand-hover: linear-gradient(135deg, #0066B3 0%, #00D4FF 100%);
+
+  /* Glow tokens */
+  --glow-cyan:            rgba(0, 229, 255, 0.3);
+  --glow-blue:            rgba(51, 166, 255, 0.35);
+  --glow-purple:          rgba(99, 102, 241, 0.3);
+  --glow-emerald:         rgba(34, 197, 94, 0.3);
 }
 
+/* ─── Theme Bridge ────────────────────────────────────────────────── */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
+  --color-background:           var(--background);
+  --color-foreground:           var(--foreground);
+  --color-card:                 var(--card);
+  --color-card-foreground:      var(--card-foreground);
+  --color-primary:              var(--primary);
+  --color-primary-foreground:   var(--primary-foreground);
+  --color-secondary:            var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  
-  --color-sidebar: var(--sidebar-bg);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-border: var(--sidebar-border);
+  --color-muted:                var(--muted);
+  --color-muted-foreground:     var(--muted-foreground);
+  --color-accent:               var(--accent);
+  --color-accent-foreground:    var(--accent-foreground);
+  --color-border:               var(--border);
+  --color-input:                var(--input);
+  --color-ring:                 var(--ring);
+  --color-sidebar:              var(--sidebar-bg);
+  --color-sidebar-foreground:   var(--sidebar-foreground);
+  --color-sidebar-primary:      var(--sidebar-primary);
+  --color-sidebar-border:       var(--sidebar-border);
 }
 
+/* ─── Base ────────────────────────────────────────────────────────── */
 @layer base {
-  * {
-    border-color: var(--border);
-  }
+  * { border-color: var(--border); }
+  html { font-family: var(--font-poppins), system-ui, sans-serif; }
   body {
     background-color: var(--background);
     color: var(--foreground);
     font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
   }
 }
 
+/* ─── Keyframes ───────────────────────────────────────────────────── */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 12px var(--glow-blue), 0 0 24px var(--glow-blue); }
+  50%       { box-shadow: 0 0 24px var(--glow-cyan), 0 0 48px var(--glow-cyan); }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+@keyframes float-up {
+  0%   { transform: translateY(6px); opacity: 0; }
+  100% { transform: translateY(0);   opacity: 1; }
+}
+@keyframes brand-border-flow {
+  0%   { background-position:   0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position:   0% 50%; }
+}
+@keyframes step-pop {
+  0%   { transform: scale(0.5); opacity: 0; }
+  70%  { transform: scale(1.15); }
+  100% { transform: scale(1);   opacity: 1; }
+}
+@keyframes rotateLogo {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes rotate-ccw {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
+}
+@keyframes logo-pulse {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 10px var(--glow-cyan)); }
+  50% { transform: scale(1.08); filter: drop-shadow(0 0 20px var(--glow-blue)); }
+}
+
+.loader-logo {
+  animation: rotateLogo 2s linear infinite, logo-pulse 2s ease-in-out infinite;
+}
+
+.loader-ring {
+  position: absolute;
+  inset: -10px;
+  border: 2px dashed var(--primary);
+  border-radius: 50%;
+  opacity: 0.3;
+  animation: rotate-ccw 4s linear infinite;
+}
+
+/* ─── Components ──────────────────────────────────────────────────── */
 @layer components {
+
+  /* ── Cards ── */
   .soft-card {
     @apply bg-card border border-border shadow-sm rounded-[2rem] transition-all duration-300;
   }
-  
   .soft-card:hover {
-    @apply shadow-md border-primary/20;
+    @apply shadow-md;
+    border-color: rgba(51,166,255,0.25);
   }
 
+  .glass-card {
+    @apply bg-card/60 backdrop-blur-xl border rounded-[2rem] transition-all duration-300 relative overflow-hidden;
+    border-color: rgba(51,166,255,0.1);
+    box-shadow: 0 0 24px rgba(51,166,255,0.06), 0 4px 24px rgba(0,0,0,0.15);
+  }
+  .glass-card:hover {
+    border-color: rgba(51,166,255,0.25);
+    box-shadow: 0 0 40px rgba(51,166,255,0.15), 0 8px 32px rgba(0,0,0,0.2);
+  }
+
+  /* Brand glow card — primary blue */
+  .glow-card-blue {
+    @apply bg-card border rounded-[2rem] transition-all duration-500 relative overflow-hidden;
+    border-color: rgba(51,166,255,0.3);
+    box-shadow: 0 0 30px rgba(51,166,255,0.1), inset 0 1px 0 rgba(51,166,255,0.08);
+  }
+  .glow-card-blue:hover {
+    box-shadow: 0 0 60px rgba(51,166,255,0.2), inset 0 1px 0 rgba(51,166,255,0.15);
+    border-color: rgba(51,166,255,0.5);
+  }
+
+  /* Accent cyan glow card */
+  .glow-card-cyan {
+    @apply bg-card border rounded-[2rem] transition-all duration-500 relative overflow-hidden;
+    border-color: rgba(0,229,255,0.25);
+    box-shadow: 0 0 30px rgba(0,229,255,0.08);
+  }
+  .glow-card-cyan:hover {
+    box-shadow: 0 0 50px rgba(0,229,255,0.2);
+    border-color: rgba(0,229,255,0.45);
+  }
+
+  /* Purple variant (secondary accent) */
+  .glow-card-purple {
+    @apply bg-card border rounded-[2rem] transition-all duration-500 relative overflow-hidden;
+    border-color: rgba(99,102,241,0.25);
+    box-shadow: 0 0 30px rgba(99,102,241,0.08);
+  }
+
+  /* ── Animated brand border ── */
+  .neon-border {
+    position: relative;
+  }
+  .neon-border::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, #0066B3, #00E5FF, #33A6FF, #0066B3);
+    background-size: 300% 300%;
+    animation: brand-border-flow 3s ease infinite;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  /* ── Buttons ── */
   .btn-soft {
-    @apply px-6 py-3 rounded-2xl font-bold transition-all duration-300 flex items-center justify-center gap-2 active:scale-95;
+    @apply px-6 py-3 rounded-2xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 active:scale-95;
   }
-
   .btn-soft-primary {
-    @apply px-6 py-3 rounded-2xl font-bold transition-all duration-300 flex items-center justify-center gap-2 active:scale-95 bg-primary text-primary-foreground shadow-lg shadow-primary/20 hover:shadow-primary/30 hover:opacity-90;
+    @apply px-6 py-3 rounded-2xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 active:scale-95 text-white hover:scale-[1.02];
+    background: var(--gradient-brand);
+    box-shadow: 0 4px 20px var(--glow-blue);
   }
-
+  .btn-soft-primary:hover {
+    background: var(--gradient-brand-hover);
+    box-shadow: 0 6px 30px var(--glow-cyan);
+  }
   .btn-soft-secondary {
-    @apply px-6 py-3 rounded-2xl font-bold transition-all duration-300 flex items-center justify-center gap-2 active:scale-95 bg-secondary text-secondary-foreground hover:bg-muted;
+    @apply px-6 py-3 rounded-2xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 active:scale-95 bg-secondary text-secondary-foreground hover:bg-muted;
   }
 
+  /* Next Step CTA — brand gradient */
+  .btn-next-step {
+    @apply flex items-center justify-center gap-3 px-10 py-5 rounded-[1.5rem] font-bold text-sm uppercase tracking-widest text-white transition-all duration-300 active:scale-95;
+    background: var(--gradient-brand);
+    box-shadow: 0 6px 30px var(--glow-blue);
+  }
+  .btn-next-step:hover {
+    background: var(--gradient-brand-hover);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 10px 40px var(--glow-cyan);
+  }
+
+  /* ── Input ── */
   .soft-input {
-    @apply bg-muted/30 border border-border rounded-2xl py-3 px-6 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-card;
+    @apply bg-muted/30 border border-border rounded-2xl py-3 px-6 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary/30 focus:bg-card;
+  }
+
+  /* ── Insight chips ── */
+  .insight-chip {
+    @apply inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-semibold uppercase tracking-widest border;
+  }
+  .insight-chip-blue {
+    background: rgba(51,166,255,0.1);
+    border-color: rgba(51,166,255,0.25);
+    color: #33A6FF;
+  }
+  .insight-chip-cyan {
+    background: rgba(0,229,255,0.08);
+    border-color: rgba(0,229,255,0.22);
+    color: #00D4FF;
+  }
+  .insight-chip-purple {
+    background: rgba(99,102,241,0.1);
+    border-color: rgba(99,102,241,0.25);
+    color: #818cf8;
+  }
+  .insight-chip-emerald {
+    background: rgba(34,197,94,0.1);
+    border-color: rgba(34,197,94,0.25);
+    color: #22C55E;
+  }
+  .insight-chip-warning {
+    background: rgba(245,158,11,0.1);
+    border-color: rgba(245,158,11,0.25);
+    color: #F59E0B;
+  }
+
+  /* ── Workflow step ── */
+  .workflow-step-active {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+  .step-complete-pop {
+    animation: step-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  /* ── Shimmer loading ── */
+  .shimmer {
+    background: linear-gradient(90deg, transparent 0%, rgba(51,166,255,0.08) 50%, transparent 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.8s ease-in-out infinite;
+  }
+
+  /* ── Custom scrollbar ── */
+  .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+  .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(51,166,255,0.25);
+    border-radius: 999px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(0,212,255,0.45);
+  }
+
+  /* ── Brand gradient text ── */
+  .text-brand-gradient {
+    background: var(--gradient-brand);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ── Brand gradient bar ── */
+  .bg-brand-gradient {
+    background: var(--gradient-brand);
   }
 }

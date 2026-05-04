@@ -2,106 +2,185 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
 import { 
   LayoutDashboard, 
   Database, 
   Weight, 
   TrendingUp, 
-  Calculator, 
   Download, 
   Settings,
-  ChevronLeft,
   Factory,
-  ArrowLeftRight
+  CheckCircle2,
+  Cpu,
+  ChevronRight
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-
 import ThemeToggle from "./ThemeToggle";
 
 const navItems = [
-  { icon: LayoutDashboard, label: "Overview", href: "/dashboard" },
-  { icon: Database, label: "Data Management", href: "/dashboard/data" },
-  { icon: Weight, label: "AHP Weighting", href: "/dashboard/weights" },
-  { icon: TrendingUp, label: "Ranking Analysis", href: "/dashboard/analysis" },
-  { icon: Download, label: "Export Results", href: "/dashboard/export" },
+  { icon: LayoutDashboard, label: "Overview",        href: "/dashboard",           storageKey: null },
+  { icon: Database,        label: "Data Management", href: "/dashboard/data",      storageKey: "dss_live_data" },
+  { icon: Weight,          label: "AHP Weighting",   href: "/dashboard/weights",   storageKey: "dss_ahp_weights" },
+  { icon: TrendingUp,      label: "Ranking Analysis",href: "/dashboard/analysis",  storageKey: "dss_computed_ranking" },
+  { icon: Download,        label: "Export Results",  href: "/dashboard/export",    storageKey: null },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen = true }) {
   const pathname = usePathname();
+  const [completedSteps, setCompletedSteps] = useState({});
+
+  const [advancedOpen, setAdvancedOpen] = useState(pathname.startsWith("/dashboard/optimization"));
+
+  useEffect(() => {
+    const check = () => {
+      const status = {};
+      navItems.forEach((item) => {
+        if (!item.storageKey) { status[item.href] = false; return; }
+        const val = localStorage.getItem(item.storageKey);
+        status[item.href] = !!(val && val !== "[]" && val !== "null");
+      });
+      setCompletedSteps(status);
+    };
+    check();
+    const interval = setInterval(check, 2500);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <div className="w-72 h-screen bg-sidebar border-r border-sidebar-border flex flex-col fixed left-0 top-0 z-[60] selection:bg-primary/20 selection:text-primary transition-all duration-300">
+    <div className={cn(
+      "h-screen bg-sidebar border-r border-sidebar-border flex flex-col fixed left-0 top-0 z-[60] selection:bg-primary/20 selection:text-primary transition-all duration-300 overflow-hidden",
+      isOpen ? "w-72 translate-x-0" : "w-20 -translate-x-full lg:translate-x-0"
+    )}>
       {/* Brand */}
-      <div className="p-8 pb-12 flex items-center gap-3">
-        <div className="w-10 h-10 bg-primary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20">
-          <Factory className="w-5 h-5 text-primary-foreground stroke-[2.5]" />
-        </div>
-        <div>
-          <h1 className="text-lg font-black tracking-tighter uppercase italic text-foreground">
-            Ashok <span className="text-primary">Leyland</span>
-          </h1>
-          <p className="text-[9px] text-muted-foreground font-bold tracking-[0.2em] uppercase -mt-1">
-            Decision Intelligence
-          </p>
-        </div>
+      <div className={cn("flex items-center transition-all duration-300", isOpen ? "p-8 pb-10" : "p-4 py-8 pb-10 justify-center")}>
+        <img 
+          src="/logo.png" 
+          alt="Ashok Leyland" 
+          className={cn("transition-all duration-300 object-contain", isOpen ? "w-full max-w-[180px]" : "w-12")} 
+        />
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-4 space-y-2 overflow-y-auto">
-        <div className="px-4 mb-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em] opacity-50">
-          Main Dashboard
+      <nav className="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar">
+        <div className={cn("px-4 mb-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em] opacity-40 transition-all duration-300 whitespace-nowrap overflow-hidden", isOpen ? "w-auto opacity-40" : "w-0 opacity-0")}>
+          Workflow
         </div>
-        {navItems.map((item) => {
-          const isActive = pathname === item.href;
+        {navItems.map((item, idx) => {
+          const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
+          const isDone = completedSteps[item.href];
           return (
             <Link
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300 group relative overflow-hidden",
-                isActive 
-                  ? "bg-primary/10 text-primary border border-primary/20 shadow-sm" 
-                  : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                "flex items-center py-3.5 rounded-2xl transition-all duration-300 group relative overflow-hidden",
+                isActive
+                  ? "bg-primary/10 text-primary border border-primary/20 shadow-sm"
+                  : "text-muted-foreground hover:text-foreground hover:bg-secondary/50",
+                isOpen ? "px-4 gap-3" : "px-0 justify-center"
               )}
             >
-              <item.icon className={cn(
-                "w-5 h-5 transition-transform duration-300",
-                isActive ? "text-primary" : "group-hover:scale-110"
-              )} />
-              <span className="text-xs font-black uppercase tracking-widest">{item.label}</span>
-              
-              {isActive && (
-                <motion.div 
+              {/* Step number circle */}
+              <div className={cn(
+                "w-6 h-6 rounded-lg flex items-center justify-center text-[9px] font-black shrink-0 transition-all",
+                isActive ? "bg-primary text-white" : isDone ? "bg-emerald-500/15 text-emerald-500" : "bg-secondary text-muted-foreground"
+              )}>
+                {isDone && !isActive ? (
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                ) : (
+                  <item.icon className="w-3.5 h-3.5" />
+                )}
+              </div>
+
+              <span className={cn("text-xs font-black uppercase tracking-wider overflow-hidden whitespace-nowrap transition-all duration-300", isOpen ? "opacity-100 w-auto flex-1" : "opacity-0 w-0")}>
+                {item.label}
+              </span>
+
+              {/* Done badge */}
+              {isDone && !isActive && isOpen && (
+                <motion.div
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"
+                />
+              )}
+
+              {isActive && isOpen && (
+                <motion.div
                   layoutId="active-indicator"
-                  className="absolute right-3 w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_10px_rgba(59,130,246,0.5)]"
+                  className="absolute right-3 w-1.5 h-1.5 rounded-full bg-primary"
+                  style={{ boxShadow: '0 0 8px var(--glow-cyan)' }}
                 />
               )}
             </Link>
           );
         })}
+
+        {/* Advanced Divider */}
+        <div className="pt-4 pb-2">
+          <button 
+            onClick={() => { if (isOpen) setAdvancedOpen(!advancedOpen); }}
+            className={cn("w-full flex items-center justify-between mb-2 group transition-colors focus:outline-none", isOpen ? "px-4" : "px-0 justify-center cursor-default")}
+          >
+            <span className={cn("text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em] transition-all duration-300 whitespace-nowrap overflow-hidden", isOpen ? "w-auto opacity-40 group-hover:text-foreground" : "w-0 opacity-0")}>
+              Advanced
+            </span>
+            <ChevronRight className={cn("w-3.5 h-3.5 text-muted-foreground transition-all duration-300", advancedOpen && isOpen ? "rotate-90 opacity-40" : "opacity-40", !isOpen && "w-0 opacity-0")} />
+          </button>
+          <motion.div
+             initial={false}
+             animate={{ height: (!isOpen || advancedOpen) ? 'auto' : 0, opacity: (!isOpen || advancedOpen) ? 1 : 0 }}
+             className="overflow-hidden"
+          >
+            <Link
+              href="/dashboard/optimization"
+              className={cn(
+                "flex items-center py-3 rounded-2xl transition-all duration-300 group relative overflow-hidden",
+                pathname.startsWith("/dashboard/optimization")
+                  ? "bg-accent/10 text-accent border border-accent/20"
+                  : "text-muted-foreground hover:text-foreground hover:bg-secondary/50",
+                isOpen ? "px-4 gap-3" : "px-0 justify-center"
+              )}
+            >
+              <div className="w-6 h-6 rounded-lg bg-secondary flex items-center justify-center shrink-0">
+                <Cpu className="w-3.5 h-3.5" />
+              </div>
+              <span className={cn("text-xs font-black uppercase tracking-wider overflow-hidden whitespace-nowrap transition-all duration-300", isOpen ? "opacity-100 w-auto flex-1" : "opacity-0 w-0")}>
+                Optimization
+              </span>
+              <span className={cn("text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-accent/10 text-accent border border-accent/20 transition-all duration-300 whitespace-nowrap overflow-hidden", isOpen ? "opacity-100 w-auto" : "opacity-0 w-0 px-0 border-none")}>
+                LP
+              </span>
+            </Link>
+          </motion.div>
+        </div>
       </nav>
 
-      {/* Footer / Settings */}
-      <div className="p-6 border-t border-sidebar-border bg-sidebar/50 backdrop-blur-sm space-y-4">
-        <ThemeToggle />
+      {/* Footer */}
+      <div className={cn("border-t border-sidebar-border bg-sidebar/50 backdrop-blur-sm space-y-1 transition-all duration-300", isOpen ? "p-4" : "p-4 px-2")}>
+        <div className={cn("transition-all duration-300 overflow-hidden", isOpen ? "h-auto opacity-100" : "h-0 opacity-0 m-0 p-0")}>
+          {isOpen && <ThemeToggle />}
+        </div>
         
         <Link
           href="/dashboard/settings"
-          className="flex items-center gap-4 px-4 py-3 rounded-2xl text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all"
+          className={cn("flex items-center py-3 rounded-2xl text-sidebar-foreground hover:text-sidebar-accent-foreground hover:bg-sidebar-accent transition-all duration-300 w-full group", isOpen ? "px-3 gap-3" : "px-0 justify-center")}
         >
-          <Settings className="w-5 h-5" />
-          <span className="text-xs font-black uppercase tracking-widest">Settings</span>
-        </Link>
-        <div className="px-4 py-4 rounded-3xl bg-secondary/50 border border-border/50 shadow-inner">
-          <p className="text-[9px] font-black text-primary uppercase tracking-widest mb-2 px-1">System Status</p>
-          <div className="flex items-center gap-3 px-1">
-            <div className="relative">
-              <span className="absolute inset-0 w-2 h-2 rounded-full bg-green-500 animate-ping opacity-75" />
-              <span className="relative block w-2 h-2 rounded-full bg-green-500" />
-            </div>
-            <span className="text-[10px] font-bold text-foreground uppercase italic tracking-tight">Active & Optimized</span>
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center relative overflow-hidden shrink-0">
+            <Settings className="w-4 h-4 text-sidebar-foreground group-hover:text-sidebar-accent-foreground transition-colors" />
           </div>
+          <span className={cn("text-xs font-black uppercase tracking-widest transition-all duration-300 overflow-hidden whitespace-nowrap", isOpen ? "opacity-100 w-auto" : "opacity-0 w-0")}>Settings</span>
+        </Link>
+        <div className={cn("pt-4 border-t border-sidebar-border flex items-center transition-all duration-300", isOpen ? "gap-3 px-3 mt-4" : "gap-0 px-0 justify-center mt-2")}>
+           <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-black italic shadow-lg shrink-0" style={{boxShadow: '0 4px 15px var(--glow-cyan)'}}>
+             AD
+           </div>
+           <div className={cn("overflow-hidden transition-all duration-300 whitespace-nowrap", isOpen ? "opacity-100 w-auto flex-1" : "opacity-0 w-0")}>
+             <p className="text-sm font-black text-sidebar-foreground truncate">Admin User</p>
+             <p className="text-[10px] font-bold text-muted-foreground truncate">System Administrator</p>
+           </div>
         </div>
       </div>
     </div>
