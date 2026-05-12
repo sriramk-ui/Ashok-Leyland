@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { loadSampleDataToStorage, SAMPLE_DATA, SAMPLE_FEATURES } from "@/lib/sampleData";
 import { 
   Plus, 
   Upload, 
@@ -40,23 +41,11 @@ export default function DataManagement() {
     }
   }, []);
 
-  const handleLoadSample = async () => {
-     try {
-       setIsUploading(true);
-       setUploadError(null);
-       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"}/sample-dataset`);
-       if (res.data && !res.data.error) {
-          setSites(res.data.data);
-          setFeatures(res.data.features);
-          localStorage.setItem("dss_live_data", JSON.stringify(res.data.data));
-          localStorage.setItem("dss_live_features", JSON.stringify(res.data.features));
-          setUploadSuccess(`${res.data.data.length} sites · ${res.data.features.length} criteria loaded`);
-       }
-     } catch (e) {
-       setUploadError("Failed to load sample dataset. Is the backend running?");
-     } finally {
-       setIsUploading(false);
-     }
+  const handleLoadSample = () => {
+     loadSampleDataToStorage();
+     setSites(SAMPLE_DATA);
+     setFeatures(SAMPLE_FEATURES);
+     setUploadSuccess(`${SAMPLE_DATA.length} sites · ${SAMPLE_FEATURES.length} criteria loaded`);
   };
 
   const handleFileUpload = async (event) => {

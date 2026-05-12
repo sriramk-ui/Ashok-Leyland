@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { loadSampleDataToStorage, SAMPLE_DATA, SAMPLE_FEATURES } from "@/lib/sampleData";
 import { motion } from "framer-motion";
 import {
   Users, Banknote, Truck, Building2, Search,
@@ -66,20 +67,12 @@ export default function DashboardPage() {
   const [selectedFeatures, setSelectedFeatures] = useState([]);
   const [workflowState, setWorkflowState] = useState({ data: false, weights: false, ranking: false });
 
-  const handleLoadSample = async () => {
-     try {
-       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"}/sample-dataset`);
-       if (res.data && !res.data.error) {
-          localStorage.setItem("dss_live_data", JSON.stringify(res.data.data));
-          localStorage.setItem("dss_live_features", JSON.stringify(res.data.features));
-          setFeatures(res.data.features);
-          setMapData(res.data.data);
-          setSelectedFeatures([]);
-          setWorkflowState(prev => ({ ...prev, data: true }));
-       }
-     } catch (e) {
-       console.error("Failed to load sample dataset", e);
-     }
+  const handleLoadSample = () => {
+     loadSampleDataToStorage();
+     setFeatures(SAMPLE_FEATURES);
+     setMapData(SAMPLE_DATA);
+     setSelectedFeatures([]);
+     setWorkflowState(prev => ({ ...prev, data: true }));
   };
 
   useEffect(() => {

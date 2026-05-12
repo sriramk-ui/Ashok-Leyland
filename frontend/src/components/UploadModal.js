@@ -5,6 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { UploadCloud, FileSpreadsheet, Activity, ChevronRight } from "lucide-react";
 import axios from "axios";
+import { loadSampleDataToStorage } from "@/lib/sampleData";
 
 export default function UploadModal() {
   const [show, setShow] = useState(false);
@@ -54,21 +55,10 @@ export default function UploadModal() {
     }
   };
 
-  const handleLoadSample = async () => {
-     try {
-       setIsUploading(true);
-       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"}/sample-dataset`);
-       if (res.data && !res.data.error) {
-          localStorage.setItem("dss_live_data", JSON.stringify(res.data.data));
-          localStorage.setItem("dss_live_features", JSON.stringify(res.data.features));
-          setShow(false);
-          router.push("/dashboard/analysis");
-       }
-     } catch (e) {
-       console.error("Failed to load generic master sample", e);
-     } finally {
-       setIsUploading(false);
-     }
+  const handleLoadSample = () => {
+     loadSampleDataToStorage();
+     setShow(false);
+     router.push("/dashboard");
   };
 
   return (
