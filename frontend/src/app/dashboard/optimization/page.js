@@ -33,7 +33,7 @@ export default function OptimizationPage() {
   const runOptimization = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.post("http://127.0.0.1:8000/analyze/optimize", {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"}/analyze/optimize`, {
         sites,
         demands,
         costs,

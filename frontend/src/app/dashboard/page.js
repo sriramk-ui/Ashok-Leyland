@@ -68,7 +68,7 @@ export default function DashboardPage() {
 
   const handleLoadSample = async () => {
      try {
-       const res = await axios.get("http://127.0.0.1:8000/sample-dataset");
+       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"}/sample-dataset`);
        if (res.data && !res.data.error) {
           localStorage.setItem("dss_live_data", JSON.stringify(res.data.data));
           localStorage.setItem("dss_live_features", JSON.stringify(res.data.features));
@@ -96,6 +96,7 @@ export default function DashboardPage() {
      if (stFeat && stFeat !== "[]") setFeatures(JSON.parse(stFeat));
      if (stComp && stComp !== "[]") setMapData(JSON.parse(stComp));
      else if (stRaw && stRaw !== "[]") setMapData(JSON.parse(stRaw));
+     else handleLoadSample();
   }, []);
 
   const filteredFeatures = features.filter(f =>

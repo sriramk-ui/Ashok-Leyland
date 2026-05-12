@@ -38,7 +38,7 @@ export default function TopHeader({ toggleSidebar }) {
     try {
       if (type === 'excel') {
          const response = await axios.post(
-            "http://127.0.0.1:8000/export/analytics",
+            `${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"}/export/analytics`,
             { data: liveData },
             { responseType: 'blob' }
          );
@@ -50,7 +50,7 @@ export default function TopHeader({ toggleSidebar }) {
          link.click();
          link.parentNode.removeChild(link);
       } else {
-         window.location.href = `http://127.0.0.1:8000/export/${type}`;
+         window.location.href = `${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"}/export/${type}`;
       }
     } catch (error) {
       console.error(`Export ${type} failed`, error);

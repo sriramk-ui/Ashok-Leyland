@@ -383,7 +383,7 @@ export default function AHPWeighting() {
     const timer = setTimeout(async () => {
       setIsLoading(true);
       try {
-        const res = await axios.post("http://127.0.0.1:8000/analyze/ahp", { matrix });
+        const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"}/analyze/ahp`, { matrix });
         setResults(res.data);
         localStorage.setItem("dss_ahp_weights", JSON.stringify(res.data.weights));
         setWeightsSaved(true);

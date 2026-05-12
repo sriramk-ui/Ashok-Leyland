@@ -34,7 +34,7 @@ export default function UploadModal() {
     formData.append("file", file);
 
     try {
-      const response = await axios.post("http://127.0.0.1:8000/upload/excel", formData, {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"}/upload/excel`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
@@ -57,7 +57,7 @@ export default function UploadModal() {
   const handleLoadSample = async () => {
      try {
        setIsUploading(true);
-       const res = await axios.get("http://127.0.0.1:8000/sample-dataset");
+       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"}/sample-dataset`);
        if (res.data && !res.data.error) {
           localStorage.setItem("dss_live_data", JSON.stringify(res.data.data));
           localStorage.setItem("dss_live_features", JSON.stringify(res.data.features));

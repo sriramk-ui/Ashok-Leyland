@@ -35,6 +35,8 @@ export default function DataManagement() {
     if (stData && stFeat) {
        setSites(JSON.parse(stData));
        setFeatures(JSON.parse(stFeat));
+    } else {
+       handleLoadSample();
     }
   }, []);
 
@@ -42,7 +44,7 @@ export default function DataManagement() {
      try {
        setIsUploading(true);
        setUploadError(null);
-       const res = await axios.get("http://127.0.0.1:8000/sample-dataset");
+       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"}/sample-dataset`);
        if (res.data && !res.data.error) {
           setSites(res.data.data);
           setFeatures(res.data.features);
@@ -74,7 +76,7 @@ export default function DataManagement() {
     formData.append("file", file);
 
     try {
-      const response = await axios.post("http://127.0.0.1:8000/upload/excel", formData, {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"}/upload/excel`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
@@ -126,7 +128,7 @@ export default function DataManagement() {
             onChange={handleFileUpload}
           />
           <a
-            href="http://127.0.0.1:8000/download/template"
+            href=`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"}/download/template`
             className="btn-soft-secondary text-[10px] no-underline"
           >
             <TableIcon className="w-4 h-4" />

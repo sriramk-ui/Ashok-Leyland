@@ -65,7 +65,10 @@ async def get_sample_dataset():
     try:
         sample_path = os.path.join(os.path.dirname(__file__), "../data/master_sample.csv")
         if not os.path.exists(sample_path):
-            raise HTTPException(status_code=404, detail="Sample dataset not found")
+            import generate_master_dataset
+            generate_master_dataset.generate_master_dataset()
+            if not os.path.exists(sample_path):
+                raise HTTPException(status_code=404, detail="Sample dataset not found")
         
         df = pd.read_csv(sample_path)
         

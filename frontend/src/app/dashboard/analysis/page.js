@@ -277,8 +277,8 @@ export default function RankingAnalysis() {
 
         const payload = { data: matrixData, weights, is_benefit: isBenefit };
         const [topsisRes, vikorRes] = await Promise.all([
-          axios.post("http://127.0.0.1:8000/analyze/topsis", payload),
-          axios.post("http://127.0.0.1:8000/analyze/vikor", payload),
+          axios.post(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"}/analyze/topsis`, payload),
+          axios.post(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"}/analyze/vikor`, payload),
         ]);
 
         const topsisScores = topsisRes.data.scores;
