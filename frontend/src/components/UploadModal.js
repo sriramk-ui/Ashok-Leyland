@@ -15,12 +15,14 @@ export default function UploadModal() {
   const router = useRouter();
   const pathname = usePathname();
 
-  // Re-check visibility when paths change
+  // Auto-load sample data silently if nothing is in storage
   useEffect(() => {
     const stData = localStorage.getItem("dss_live_data");
     const stFeat = localStorage.getItem("dss_live_features");
     if (!stData || !stFeat || stData === "[]" || stData === "null") {
-      setShow(true);
+      // Load sample data automatically — no modal needed
+      loadSampleDataToStorage();
+      setShow(false);
     } else {
       setShow(false);
     }
